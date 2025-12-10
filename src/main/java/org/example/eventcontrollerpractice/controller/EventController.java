@@ -6,6 +6,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.example.eventcontrollerpractice.model.Event;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+
 
 @RestController
 @RequestMapping("/api/events")
@@ -28,23 +31,48 @@ public class EventController {
     }
 
     @GetMapping
-    public List<Event> getAllEvents() {
-        return events;
+    public ResponseEntity<List<Event>> getAllEvents() {
+        return ResponseEntity.ok(events);
     }
 
     @GetMapping("/{id}")
-    public Event getEventById(@PathVariable Long id) {
+    public ResponseEntity<Event> getEventById(@PathVariable Long id) {
         for (Event event : events) {
             if (event.getId().equals(id)) {
-                return event;
+                return ResponseEntity.ok(event);
             }
         }
-        return null;
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
-    public Event createEvent(@RequestBody Event event) {
+    public ResponseEntity<Event> createEvent(@RequestBody Event event) {
         events.add(event);
-        return event;
+        return ResponseEntity.status(HttpStatus.CREATED).body(event);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteEvent(@PathVariable Long id) {
+        for (Event event : events) {
+            if (event.getId().equals(id)) {
+                events.remove(event);
+                return;
+            }
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Event> updateEvent(@PathVariable Long id, @RequestBody Event updatedEvent) {
+        for (Event event : events) {
+            if (event.getId().equals(id)) {
+                event.setName(updatedEvent.getName());
+                event.setLocation(updatedEvent.getLocation());
+                event.setDate(updatedEvent.getDate());
+                return ResponseEntity.ok(event);
+            }
+        }
+        return ResponseEntity.notFound().build();
+
+    }
+
 }
